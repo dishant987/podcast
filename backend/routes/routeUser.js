@@ -8,6 +8,7 @@ routerUser.route("/users/sign-up").post(signUp);
 routerUser.route("/users/sign-in").post(signIn);
 routerUser.route("/users/logout").post(logout);
 routerUser.get("/users/check-cookie",verifyJWT,async (req,res)=>{
+    console.log(req.cookies)
     const refreshToken = req.cookies.refreshToken
     const accessToken =  req.cookies.accessToken
 

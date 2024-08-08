@@ -21,8 +21,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "../components/ui/input";
 import { Switch } from "../components/ui/switch";
+import axios from 'axios'
 
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import toast from "react-hot-toast";
+import { useTheme } from "../components/theme-provider";
 
 
 const BottomGradient = () => {
@@ -36,6 +39,7 @@ const BottomGradient = () => {
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
+  username: z.string().min(2).max(50),
   email: z.string().email(),
   password: z
     .string()
@@ -70,7 +74,9 @@ const formSchema = z.object({
 });
 
 const SignUp = () => {
+  const navigate = useNavigate()
 
+  const { theme } = useTheme()
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -79,35 +85,53 @@ const SignUp = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      username: '',
       email: "",
       password: "",
     },
   });
 
   const handleSubmit = async (data) => {
+ 
     setLoading(true);
     setError(() => "");
-    const { name, email, password } = data;
+
+
+    const { name, username, email, password } = data;
 
     try {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/v1/users/sign-up`, {
+        name, username, email, password
+      })
 
-      console.log(name, email, password);
-      form.reset();
+      if (res.status === 201 && res.data?.message === "Signup successfully") {
+
+        toast.success(res.data?.message)
+        navigate('/sign-in')
+      }
+      console.log(res);
+
     } catch (error) {
-      console.error("Failed to create account:", error);
+      // console.error("Failed to create account:", error);
+      if (error.response.data?.message === "User with email or username already exists" && error.response.status === 409) {
+
+        return setError(error.response.data?.message)
+      }
+
+      toast.error(error.message)
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card className="dark:bg-black md:max-w-[450px]  max-w-[350px] mx-auto mt-10">
-      <div className="mx-auto w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl bg-white shadow-input dark:bg-black rounded-3xl p-2 sm:p-6 md:p-5">
+    <Card className="dark:bg-black   max-w-[350px]  mt-10 mx-auto w-full  sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-lg bg-white shadow-input rounded-3xl p-2 sm:p-6 md:p-5 md:mb-[50px]">
+      <div className="">
         <CardHeader>
           <CardTitle className="text-center text-2xl sm:text-3xl md:text-4xl">
-           <Link to={'/'} className=" uppercase">
-           Podcaster Register
-           </Link>
+            <Link to={'/'} className=" uppercase">
+              Podcaster Register
+            </Link>
           </CardTitle>
           <CardDescription className="pt-3 text-center">
             {/* <ThemeToggle/> */}
@@ -131,6 +155,23 @@ const SignUp = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="border-gray-500"
+                        placeholder="shadcn"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
                       <Input
                         className="border-gray-500"

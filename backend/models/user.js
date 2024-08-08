@@ -11,6 +11,11 @@ const user = new Schema(
       trim: true,
       // index:true
     },
+    name: {
+      type: String,
+      required: [true, "Username is required"],
+      // index:true
+    },
     email: {
       type: String,
       required: [true, "Email is required"],

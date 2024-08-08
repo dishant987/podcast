@@ -6,28 +6,58 @@ import { Sheet, SheetTrigger, SheetContent } from "./ui/sheet"
 import { ModeToggle } from './mode-toggle'
 
 import { Link, NavLink } from "react-router-dom"
-
-const navlinks = [
-  {
-    name: "Home",
-    path: "/"
-  },
-  {
-    name: "Categories",
-    path: "/categories"
-  },
-  {
-    name: "All Podcasts",
-    path: "/all-podcasts"
-  },
-  {
-    name: "Profile",
-    path: "/all-profile"
-  },
-
-]
+import { useDispatch, useSelector } from "react-redux"
+import { useCookies } from "react-cookie";
+import { logout } from "../store/slice/auth"
+import { useEffect } from "react"
+import axios from 'axios'
 
 export default function Navbar() {
+
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
+  const [cookies, removeCookie] = useCookies(['accessToken', 'refreshToken'])
+  const user = useSelector(state => state.auth.user)
+
+  const dispatch = useDispatch()
+  const handleLogout = () => {
+    removeCookie('accessToken')
+    removeCookie('refreshToken')
+    dispatch(logout())
+  }
+  // const checkCookie = async () => {
+  //   const data = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/v1//users/check-cookie`, { withCredentials: true })
+  //   console.log(data)
+  // }
+  // useEffect(() => {
+  //   checkCookie()
+  // },[])
+  const navlinks = [
+    {
+      name: "Home",
+      path: "/",
+      show: true
+
+    },
+    {
+      name: "Categories",
+      path: "/categories",
+      show: true
+
+    },
+    {
+      name: "All Podcasts",
+      path: "/all-podcasts",
+      show: true
+
+    },
+    {
+      name: "Profile",
+      path: "/all-profile",
+      show: isLoggedIn
+
+    },
+
+  ]
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white dark:border-gray-400 dark:bg-gray-800 dark:shadow-lg dark:duration-700 dark:shadow-yellow-400">
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
@@ -38,32 +68,45 @@ export default function Navbar() {
         <nav className="hidden items-center gap-10 text-sm font-medium md:flex">
           {
             navlinks.map((item, i) => (
-              <NavLink
-                key={i}
-                to={item.path}
-                className={({ isActive }) =>
-                  isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                }
-              >
-                {item.name}
-              </NavLink>
+              item.show && (
+                <NavLink
+                  key={i}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              )
             ))
           }
         </nav>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-4">
-            <Link to={'/sign-in'}>
-              <Button className="rounded-3xl">
-                Login
-              </Button>
-            </Link>
-            <Link to={'/sign-up'}>
-            <Button className="rounded-3xl">
-              Sign Up
-            </Button>
-            </Link>
-          
-          </div>
+          {
+            isLoggedIn ? (
+              <div className="flex items-center gap-4">
+                <Button className="rounded-3xl" onClick={() => handleLogout()}>
+                  Logout
+                </Button>
+
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Link to={'/sign-in'}>
+                  <Button className="rounded-3xl">
+                    Login
+                  </Button>
+                </Link>
+                <Link to={'/sign-up'}>
+                  <Button className="rounded-3xl">
+                    Sign Up
+                  </Button>
+                </Link>
+
+              </div>
+            )
+          }
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">

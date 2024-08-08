@@ -2,15 +2,23 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import { ThemeProvider } from './components/theme-provider.jsx'
-import { ModeToggle } from './components/mode-toggle.jsx'
-import { Toaster } from 'sonner'
+import { Provider } from 'react-redux'
+import { store, persistor } from './store/store.js'
+import { PersistGate } from 'redux-persist/integration/react';
+import { CookiesProvider } from 'react-cookie'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-    {/* <ModeToggle/> */}
 
-    <App />
-    <Toaster />
+
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <CookiesProvider>
+          <App />
+        </CookiesProvider>
+      </PersistGate>
+    </Provider>
+
   </ThemeProvider>
 
 )

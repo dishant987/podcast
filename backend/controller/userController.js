@@ -3,22 +3,29 @@ import { generateToken } from "../utils/generateToken.js";
 
 export const signUp = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, username, email, password } = req.body;
+   
 
     if (!password) {
-      return res.json({
+      return res.status(400).json({
         statuscode: 400,
         message: " password is required",
       });
     }
+    if (!name) {
+      return res.status(400).json({
+        statuscode: 400,
+        message: " name is required",
+      });
+    }
     if (!email) {
-      return res.json({
+      return res.status(400).json({
         statuscode: 400,
         message: "email is required",
       });
     }
     if (!username) {
-      return res.json({
+      return res.status(400).json({
         statuscode: 400,
         message: "username is required",
       });
@@ -27,7 +34,7 @@ export const signUp = async (req, res) => {
       $or: [{ username }, { email }],
     });
     if (existedUser) {
-      return res.json({
+      return res.status(409).json({
         statuscode: 409,
         message: "User with email or username already exists",
       });
@@ -37,10 +44,11 @@ export const signUp = async (req, res) => {
       username: username,
       email: email,
       password: password,
+      name: name,
     });
 
     if (!user) {
-      res.json({
+      res.status(500).json({
         statuscode: 500,
         message: "Something went wrong while registering the user",
       });
@@ -49,12 +57,12 @@ export const signUp = async (req, res) => {
     //   await sendEmail({ email, emailType: "VERIFY", userId: user._id });
 
     res.status(201).json({
-      statuscode: 200,
-      message: "login Successfully ",
+      statuscode: 201,
+      message: "Signup successfully",
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       statuscode: 500,
       message: error.message,
     });
@@ -65,13 +73,13 @@ export const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!password) {
-      return res.json({
+      return res.status(400).json({
         statuscode: 400,
         message: " password is required",
       });
     }
     if (!email) {
-      return res.json({
+      return res.status(400).json({
         statuscode: 400,
         message: "email is required",
       });
@@ -82,7 +90,7 @@ export const signIn = async (req, res) => {
     });
 
     if (!user) {
-      return res.json({
+      return res.status(404).json({
         statuscode: 404,
         message: "User does not exist",
       });
@@ -96,36 +104,37 @@ export const signIn = async (req, res) => {
 
     const isPasswordValid = await user.isPasswordCorrect(password);
     if (!isPasswordValid) {
-      return res.json({
+      return res.status(401).json({
         statuscode: 401,
         message: "Invalid User credentials",
       });
     }
 
-    const { accessToken ,refreshToken} = await generateToken(user._id);
+    const { accessToken, refreshToken } = await generateToken(user._id);
 
-    const LoggedInUser = await User.findById(user._id).select("-password -refreshToken");
+    const LoggedInUser = await User.findById(user._id).select(
+      "-password -refreshToken"
+    );
 
     const options = {
       httpOnly: true,
-      secure: true,
+      // secure: true,
     };
 
-    return (
-      res
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
-        .json({
-          statuscode: 200,
-          user: LoggedInUser,
-          accessToken,
-            refreshToken,
-          message: "Login SuccessFully",
-        })
-    );
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        statuscode: 200,
+        user: LoggedInUser,
+        accessToken,
+        refreshToken,
+        message: "Login SuccessFully",
+      });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       statuscode: 500,
       message: error.message,
     });
@@ -133,33 +142,31 @@ export const signIn = async (req, res) => {
 };
 
 export async function logout(req, res) {
-    await User.findByIdAndUpdate(
-      req._id,
-      {
-        $set: { refreshToken: null },
-      },
-      { new: true }
-    );
-  
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
-  
-    return res
-      .clearCookie("accessToken", options)
-      .clearCookie("refreshToken", options)
-      .json({
-        statuscode: 200,
-        message: "User Logged Out",
-      });
-  }
+  await User.findByIdAndUpdate(
+    req._id,
+    {
+      $set: { refreshToken: null },
+    },
+    { new: true }
+  );
 
-  export async function userDetails(req,res,next){
-        try {
-          const{email} = req.user
-          const existingUser = await User.findOne({email}).select("-password")
-        } catch (error) {
-          
-        }
-  }
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json({
+      statuscode: 200,
+      message: "User Logged Out",
+    });
+}
+
+export async function userDetails(req, res, next) {
+  try {
+    const { email } = req.user;
+    const existingUser = await User.findOne({ email }).select("-password");
+  } catch (error) {}
+}
