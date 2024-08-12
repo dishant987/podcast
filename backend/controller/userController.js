@@ -4,7 +4,6 @@ import { generateToken } from "../utils/generateToken.js";
 export const signUp = async (req, res) => {
   try {
     const { name, username, email, password } = req.body;
-   
 
     if (!password) {
       return res.status(400).json({
@@ -116,15 +115,21 @@ export const signIn = async (req, res) => {
       "-password -refreshToken"
     );
 
-    const options = {
+    const accessOptions = {
       httpOnly: true,
-      // secure: true,
+      secure: false,
+      maxAge: new Date().getDate() + 1,
+    };
+    const refreshOptions = {
+      httpOnly: true,
+      secure: false,
+      maxAge: new Date().getDate() + 10,
     };
 
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
+      .cookie("accessToken", accessToken, accessOptions)
+      .cookie("refreshToken", refreshToken, refreshOptions)
       .json({
         statuscode: 200,
         user: LoggedInUser,
@@ -152,7 +157,7 @@ export async function logout(req, res) {
 
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: false,
   };
 
   return res

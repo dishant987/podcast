@@ -10,19 +10,32 @@ import { useDispatch, useSelector } from "react-redux"
 import { useCookies } from "react-cookie";
 import { logout } from "../store/slice/auth"
 import { useEffect } from "react"
+import { SparklesCore } from "./ui/sparkles";
 import axios from 'axios'
+import toast from "react-hot-toast"
+import { useTheme } from "./theme-provider"
 
 export default function Navbar() {
 
+  const { theme } = useTheme();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
-  const [cookies, removeCookie] = useCookies(['accessToken', 'refreshToken'])
+  const [cookies, removeCookie] = useCookies(['accessToken', 'refreshToken'], {
+    doNotParse: true,
+    doNotUpdate: true
+  })
   const user = useSelector(state => state.auth.user)
-
   const dispatch = useDispatch()
-  const handleLogout = () => {
+  console.log(cookies.accessToken)
+  const handleLogout = async () => {
     removeCookie('accessToken')
     removeCookie('refreshToken')
     dispatch(logout())
+    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/v1//users/logout`, { _id: user._id })
+    console.log(res)
+    if (res.data?.message) {
+      toast.success(res.data.message)
+    }
+
   }
   // const checkCookie = async () => {
   //   const data = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/v1//users/check-cookie`, { withCredentials: true })
@@ -59,124 +72,139 @@ export default function Navbar() {
 
   ]
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white dark:border-gray-400 dark:bg-gray-800 dark:shadow-lg dark:duration-700 dark:shadow-yellow-400">
-      <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
-        <NavLink to="/" className="flex items-center gap-2">
-          <MountainIcon className="h-6 w-6" />
-          <span className="sr-only">Acme Inc</span>
-        </NavLink>
-        <nav className="hidden items-center gap-10 text-sm font-medium md:flex">
-          {
-            navlinks.map((item, i) => (
-              item.show && (
-                <NavLink
-                  key={i}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                  }
-                >
-                  {item.name}
-                </NavLink>
+    <>
+
+      <header className="sticky top-0 z-50 w-full border-b bg-white dark:border-gray-400 dark:bg-gray-800 dark:shadow-lg dark:duration-700 dark:shadow-orange-400">
+        <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
+          <NavLink to="/" className="flex items-center gap-2">
+            <MountainIcon className="h-6 w-6" />
+            <span className="sr-only">Acme Inc</span>
+          </NavLink>
+          <nav className="hidden items-center gap-10 text-sm font-medium md:flex">
+            {
+              navlinks.map((item, i) => (
+                item.show && (
+                  <NavLink
+                    key={i}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                    }
+                  >
+                    {item.name}
+                  </NavLink>
+                )
+              ))
+            }
+          </nav>
+          <div className="flex items-center gap-4">
+            {
+              isLoggedIn ? (
+                <div className="flex items-center gap-4">
+                  <Button className="rounded-3xl" onClick={() => handleLogout()}>
+                    Logout
+                  </Button>
+
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <Link to={'/sign-in'}>
+                    <Button className="rounded-3xl">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to={'/sign-up'}>
+                    <Button className="rounded-3xl">
+                      Sign Up
+                    </Button>
+                  </Link>
+
+                </div>
               )
-            ))
-          }
-        </nav>
-        <div className="flex items-center gap-4">
-          {
-            isLoggedIn ? (
-              <div className="flex items-center gap-4">
-                <Button className="rounded-3xl" onClick={() => handleLogout()}>
-                  Logout
+            }
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <SearchIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  <span className="sr-only">Search</span>
                 </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[300px] p-4">
+                <div className="relative">
+                  <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <Input type="search" placeholder="Search..." className="pl-8 w-full" />
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              </div>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Link to={'/sign-in'}>
-                  <Button className="rounded-3xl">
-                    Login
-                  </Button>
-                </Link>
-                <Link to={'/sign-up'}>
-                  <Button className="rounded-3xl">
-                    Sign Up
-                  </Button>
-                </Link>
+            {/* <MoonIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /> */}
+            <ModeToggle className="" />
 
-              </div>
-            )
-          }
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <SearchIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                <span className="sr-only">Search</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[300px] p-4">
-              <div className="relative">
-                <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                <Input type="search" placeholder="Search..." className="pl-8 w-full" />
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full md:hidden">
+                  <MenuIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
 
-          {/* <MoonIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /> */}
-          <ModeToggle className="" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="md:hidden">
+                <div className="grid gap-4 p-4">
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                    }
 
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full md:hidden">
-                <MenuIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  >
+                    Home
+                  </NavLink>
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                    }
 
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="md:hidden">
-              <div className="grid gap-4 p-4">
-                <NavLink
-                  to="/"
-                  className={({ isActive }) =>
-                    isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                  }
+                  >
+                    About
+                  </NavLink>
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                    }
 
-                >
-                  Home
-                </NavLink>
-                <NavLink
-                  to="/"
-                  className={({ isActive }) =>
-                    isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                  }
+                  >
+                    Services
+                  </NavLink>
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                    }
 
-                >
-                  About
-                </NavLink>
-                <NavLink
-                  to="/"
-                  className={({ isActive }) =>
-                    isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                  }
+                  >
+                    Contact
 
-                >
-                  Services
-                </NavLink>
-                <NavLink
-                  to="/"
-                  className={({ isActive }) =>
-                    isActive ? "text-gray-900 dark:text-gray-50" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                  }
-
-                >
-                  Contact
-
-                </NavLink>
-              </div>
-            </SheetContent>
-          </Sheet>
+                  </NavLink>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
-    </header>
+
+      </header>
+      {theme === 'dark' && (
+        <SparklesCore
+          background="transparent"
+          minSize={0.46}
+          maxSize={1}
+          particleDensity={1200}
+          className="w-full h-6 relative"
+          particleColor="#FFFFFF"
+        />
+      )}
+
+    </>
   )
 }
 

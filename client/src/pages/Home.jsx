@@ -12,21 +12,23 @@ export default function Component() {
                 <BoxReveal boxColor={"#aaa8c6"} duration={0.5}>
 
 
-                  <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-[120px]/none">
+                  <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-[120px]/none pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-600/80 bg-clip-text text-center  leading-none text-transparent dark:from-white dark:to-slate-300/30">
                     Create & Listen The
                   </h1>
                 </BoxReveal>
                 <BoxReveal boxColor={"#aaa8c6"} duration={0.5}>
 
-              
-                <h1 className="text-4xl font-bold flex tracking-tighter sm:text-5xl xl:text-[120px]/none">
-                  P <span> <img
-                    src="/headphone.png"
-                    className="lg:h-[125px]  h-[42px]"
-                    alt="Hero"
 
-                  /></span> dcast
-                </h1>
+                  <h1 className="text-4xl font-bold flex tracking-tighter sm:text-5xl xl:text-[120px]/none ">
+                    <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-600/80 bg-clip-text text-center  leading-none text-transparent dark:from-white dark:to-slate-300/30">
+                      P<span className=" invisible">.</span>
+                    </span>  <span> <img
+                      src="/headphone.png"
+                      className="lg:h-[125px]  h-[42px] rounded-full"
+                      alt="Hero"
+
+                    /></span> <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-600/80 bg-clip-text text-center  leading-none text-transparent dark:from-white dark:to-slate-300/30">dcast</span>
+                  </h1>
                 </BoxReveal>
                 <p className="max-w-[800px] md:text-xl">
                   listen to the most popular podcasts on just one platform - <span className=" uppercase font-extrabold ">PodCaster</span>

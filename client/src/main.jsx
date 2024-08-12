@@ -9,11 +9,9 @@ import { CookiesProvider } from 'react-cookie'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-
-
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <CookiesProvider>
+        <CookiesProvider defaultSetOptions={{ path: '/' }}>
           <App />
         </CookiesProvider>
       </PersistGate>

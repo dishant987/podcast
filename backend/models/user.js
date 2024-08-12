@@ -71,7 +71,7 @@ user.methods.generateAccessToken = function () {
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+      expiresIn: new Date().getDate() + 1,
     }
   );
 };
@@ -82,7 +82,7 @@ user.methods.generateRefreshToken = function () {
     },
     process.env.REFRESH_TOKEN_SECRET,
     {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+      expiresIn: new Date().getDate() + 10,
     }
   );
 };
