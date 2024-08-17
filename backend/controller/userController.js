@@ -139,7 +139,7 @@ export const signIn = async (req, res) => {
       });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    return res.status(500).json({
       statuscode: 500,
       message: error.message,
     });
@@ -175,3 +175,58 @@ export async function userDetails(req, res, next) {
     const existingUser = await User.findOne({ email }).select("-password");
   } catch (error) {}
 }
+
+const refreshAccessToken = async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!incomingRefreshToken) {
+    return res.status(401).json({
+      statuscode: 401,
+      message: "unauthorized request",
+    });
+  }
+
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    const user = await User.findById(decodedToken?._id);
+
+    if (!user) {
+      return res.status(401).json({
+        statuscode: 401,
+        message: "Invalid refresh token",
+      });
+    }
+
+    if (incomingRefreshToken !== user?.refreshToken) {
+      return res.status(401).json({
+        statuscode: 401,
+        message: "Refresh token is expired or used",
+      });
+    }
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    const { accessToken, newRefreshToken } = await generateToken(user._id);
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json({
+        statuscode: 401,
+        accessToken,
+        refreshToken: newRefreshToken,
+        message: "Access token refreshed",
+      });
+  } catch (error) {
+    throw new ApiError(401, error?.message || "Invalid refresh token");
+  }
+};

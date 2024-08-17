@@ -126,7 +126,7 @@ const SignUp = () => {
 
   return (
     <Card className="dark:bg-black   max-w-[350px]  mt-10 mx-auto   sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-lg bg-white shadow-input rounded-3xl p-2 sm:p-6 md:p-5 md:mb-[50px]">
-      <div className="">
+     
         <CardHeader>
           <CardTitle className="text-center text-2xl sm:text-3xl md:text-4xl">
             <Link to={'/'} className=" uppercase">
@@ -255,7 +255,7 @@ const SignUp = () => {
             </p>
           </CardFooter>
         </CardContent>
-      </div>
+     
     </Card>
   );
 };

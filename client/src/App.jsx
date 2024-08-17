@@ -11,6 +11,8 @@ import Categories from './pages/Categories'
 import AuthLayout from './layout/AuthLayout'
 import { useTheme } from './components/theme-provider.jsx'
 import { Toaster } from 'react-hot-toast';
+import Profile from './pages/Profile.jsx';
+import AddPodcast from './pages/AddPodcast.jsx';
 
 const App = () => {
 
@@ -22,6 +24,8 @@ const App = () => {
           <Route path="/" element={<Mainlayout />}>
             <Route index element={<Home />} />
             <Route path='/categories' element={<Categories />} />
+            <Route path='/all-profile' element={<Profile />} />
+            <Route path='/all-podcasts' element={<AddPodcast />} />
           </Route>
           <Route path="/" element={<AuthLayout />}>
             <Route path='/sign-in' element={<Login />} />
